@@ -157,7 +157,6 @@ label {
   outline: none;
 }
 
-/* Pas toujours supporté, mais améliore certains navigateurs */
 #nbJoueurs option {
   background-color: #182233;
   color: #e2e2e2;
