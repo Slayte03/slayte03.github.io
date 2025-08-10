@@ -7,7 +7,7 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  font-size: 1.25em; /* Zoom global */
+  font-size: 1.75em; /* Zoom global */
 }
 
 h1 {
@@ -153,5 +153,6 @@ label {
   background-color: #182233;
   color: #e2e2e2;
 }
+
 
 
