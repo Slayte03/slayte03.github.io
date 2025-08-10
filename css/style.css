@@ -6,6 +6,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content:center;
   min-height: 100vh;
   font-size: 1.75em; /* Zoom global */
 }
@@ -153,6 +154,7 @@ label {
   background-color: #182233;
   color: #e2e2e2;
 }
+
 
 
 
