@@ -1,0 +1,164 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #182233;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 2.8em;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  color: #007af3;
+  font-weight: bold;
+  text-align: center;
+}
+
+#jeu {
+  background-color: #202127cc;
+  width: 100%;
+  max-width: 800px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.indice {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  color: #e2e2e2;
+}
+
+input[type="text"] {
+  width: 70%;
+  padding: 12px 16px;
+  font-size: 1.2em;
+  border: 1px solid #2b2c35;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  outline: none;
+  margin-right: 10px;
+  background-color: #182233;
+  color: rgb(221, 221, 221);
+}
+
+button {
+  padding: 12px 24px;
+  font-size: 1.2em;
+  background-color: #07376d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#boutonValider {
+  background-color: #00779b;
+}
+
+#boutonValider:hover {
+  background-color: #004053;
+}
+
+#boutonRejouer {
+  padding: 12px 24px;
+  font-size: 1.2em;
+  background-color: #07376d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+#boutonRejouer:hover {
+  background-color: #0056b3;
+}
+
+.message {
+  margin-top: 25px;
+  font-weight: bold;
+  color: #e2e2e2;
+  font-size: 1.1em;
+  min-height: 1.5em;
+}
+
+#progression {
+  margin-top: 25px;
+  font-style: italic;
+  color: #007af3;
+  font-size: 1em;
+}
+
+.skip {
+  margin-top: 5px;
+}
+
+#commencer {
+  margin: 20px auto;
+  display: block;
+}
+
+#nbJoueurs {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #007af3;
+  color: #e2e2e2;
+  border: solid 1px #011b38;
+}
+
+#choix {
+  background-color: #202127cc;
+  width: 100%;
+  max-width: 800px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  text-align: center;
+}
+
+
+label {
+  color: #007af3;
+  font-size: 1.2em;
+  font-weight: bold;
+  font-style: italic;
+  margin-bottom: 10px;
+  display: block;
+}
+
+#nbJoueurs {
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #182233;
+  color: #e2e2e2;
+  font-size: 1em;
+  border: 1px solid #011b38;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out, background-color 0.3s ease;
+}
+
+#nbJoueurs:hover,
+#nbJoueurs:focus {
+  background-color: #1e2b47;
+  border-color: #007af3;
+  outline: none;
+}
+
+/* Pas toujours supporté, mais améliore certains navigateurs */
+#nbJoueurs option {
+  background-color: #182233;
+  color: #e2e2e2;
+}
