@@ -572,7 +572,7 @@ document.addEventListener("DOMContentLoaded", () => {
             { nom: "Dawson Mercer", indices: ["#91 New Jersey Devils", "Shoots Right", "(C,RW)", "Draft 2020"] },
             { nom: "Stefan Noesen", indices: ["#11 New Jersey Devils", "Shoots Right", "(RW,LW)", "Draft 2011"] },
             { nom: "Cody Glass", indices: ["#12 New Jersey Devils", "Shoots Right", "(C,RW)", "Draft 2017"] },
-            { nom: "Kurtis MacDermid", indices: ["#23 New Jersey Devils", "Shoots Left", "(LW,D)", "Draft Undrafted"] },
+            { nom: "Kurtis MacDermid", indices: ["#23 New Jersey Devils", "Shoots Left", "(LW)", "Draft Undrafted"] },
             { nom: "Evgenii Dadonov", indices: ["#10 New Jersey Devils", "Shoots Left", "(RW,LW)", "Draft 2007"] },
             { nom: "Juho Lammikko", indices: ["#83 New Jersey Devils", "Shoots Left", "(C,LW)", "Draft 2014"] },
             { nom: "Paul Cotter", indices: ["#47 New Jersey Devils", "Shoots Left", "(LW)", "Draft 2018"] },
