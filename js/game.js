@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
             { nom: "Mavrik Bourque", indices: ["#22 Dallas Stars", "Shoots Right", "(C,RW)", "Draft 2020"] },
             { nom: "Oskar Bäck", indices: ["#10 Dallas Stars", "Shoots Left", "(C,LW)", "Draft 2018"] },
             { nom: "Colin Blackwell", indices: ["#15 Dallas Stars", "Shoots Right", "(C,W)", "Draft 2011"] },
-            { nom: "Antonio Stranges", indices: ["71 Dallas Stars", "Shoots Left", "(LW, C)", "Draft 2020"] },
+            { nom: "Antonio Stranges", indices: ["#71 Dallas Stars", "Shoots Left", "(LW, C)", "Draft 2020"] },
 
             // Défenseurs
             { nom: "Miro Heiskanen", indices: ["#4 Dallas Stars", "Shoots Left", "(D)", "Draft 2017"] },
