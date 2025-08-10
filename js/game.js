@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Gardiens
             { nom: "Spencer Knight", indices: ["#30 Chicago Blackhawks", "Catches Left", "(G)", "Draft 2019"] },
             { nom: "Laurent Brossoit", indices: ["#39 Chicago Blackhawks", "Catches Left", "(G)", "Draft 2011"] },
-            { nom: "Arvid Söderblom", indices: ["#40 Chicago Blackhawks", "Catches Left", "(G)", "Draft Undrafted"] }
+            { nom: "Arvid Soderblom", indices: ["#40 Chicago Blackhawks", "Catches Left", "(G)", "Draft Undrafted"] }
         ],
 
         "Colorado Avalanche": [
