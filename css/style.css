@@ -65,6 +65,7 @@ button:hover {
 
 #boutonValider {
   background-color: #00779b;
+  margin-top: 5px;
 }
 
 #boutonValider:hover {
