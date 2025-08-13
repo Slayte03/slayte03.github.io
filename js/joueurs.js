@@ -1,4 +1,4 @@
-    const joueursParEquipe = {
+/*const joueursParEquipe = {
         "Anaheim Ducks": [
             //Attaquants
             { nom: "Ryan Strome", indices: ["#16 Anaheim Ducks", "Shoots Right", "(C)", "Draft 2011"] },
@@ -979,4 +979,4 @@
             { nom: "Joseph Woll", indices: ["#60 Toronto Maple Leafs", "Catches Left", "(G)", "Draft 2016"] },
             { nom: "Anthony Stolarz", indices: ["#41 Toronto Maple Leafs", "Catches Left", "(G)", "Draft 2012"] }
         ]
-    };
+    };*/
