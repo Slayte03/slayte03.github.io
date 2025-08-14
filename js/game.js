@@ -1,8 +1,22 @@
+// -------------------------
+// 0️⃣ Récupération des éléments HTML
+// -------------------------
 const datalist = document.getElementById("suggestions");
 const divJeu = document.getElementById("jeu");
 const btnCommencer = document.getElementById("commencer");
 const selectNbJoueurs = document.getElementById("nbJoueurs");
+const reponseInput = document.getElementById("reponse");
+const indiceDiv = document.getElementById("indice");
+const messageDiv = document.getElementById("message");
+const progressionDiv = document.getElementById("progression");
+const boutonValider = document.getElementById("boutonValider");
+const boutonSkip = document.getElementById("boutonSkip");
+const boutonHint = document.getElementById("boutonNextHint");
+const boutonRejouer = document.getElementById("boutonRejouer");
 
+// -------------------------
+// Variables du jeu
+// -------------------------
 let joueursParEquipe = {};
 let joueurs = [];
 let joueurIndex = 0;
@@ -10,15 +24,6 @@ let indiceIndex = 0;
 let essaisRestants = 4;
 let score = 0;
 let enAttenteDeSuivant = false;
-
-const boutonSkip = document.getElementById("boutonSkip");
-const indiceDiv = document.getElementById("indice");
-const reponseInput = document.getElementById("reponse");
-const boutonValider = document.getElementById("boutonValider");
-const messageDiv = document.getElementById("message");
-const progressionDiv = document.getElementById("progression");
-const boutonRejouer = document.getElementById("boutonRejouer");
-const boutonHint = document.getElementById("boutonNextHint");
 
 // ---------------------------------------------------------
 // 1️⃣ Équipes locales pour fallback ou rapidité
@@ -1006,243 +1011,241 @@ const localTeams = {
         ]
 };
 
-// ---------------------------------------------------------
-// 2️⃣ Fonctions pour récupérer les joueurs via l'API NHL
-// ---------------------------------------------------------
-async function fetchRosterWithDraft(teamId, teamName) {
-    const rosterResp = await fetch(`https://statsapi.web.nhl.com/api/v1/teams/${teamId}/roster`);
+// -------------------------
+// 1️⃣ Récupérer le roster via le proxy avec Promise.all
+// -------------------------
+async function fetchRoster(teamId, teamName) {
+  try {
+    const rosterResp = await fetch(`http://localhost:3000/roster/${teamId}`);
     const roster = await rosterResp.json();
 
-    const result = [];
-    for (const p of roster.roster) {
-        const infoResp = await fetch(`https://statsapi.web.nhl.com/api/v1/people/${p.person.id}`);
+    const promises = roster.roster.map(async (p) => {
+      try {
+        const infoResp = await fetch(`http://localhost:3000/player/${p.person.id}`);
         const info = await infoResp.json();
-
-        result.push({
-            nom: p.person.fullName,
-            indices: [
-                `#${p.jerseyNumber || "?"} ${teamName}`,
-                p.position.code === "G"
-                    ? `Catches ${info.people[0].shootsCatches || "Left"}`
-                    : `Shoots ${info.people[0].shootsCatches || "Right"}`,
-                `(${p.position.code})`,
-                info.people[0].draft
-                    ? `Draft ${info.people[0].draft.year}`
-                    : "Draft info unavailable"
-            ]
-        });
-    }
-    return result;
-}
-
-async function loadAllTeams() {
-    const apiTeams = [
-        { id: 24, name: "Anaheim Ducks" },
-        { id: 6, name: "Boston Bruins" }
-    ];
-
-    // Charger les équipes locales
-    joueursParEquipe = { ...localTeams };
-
-    // Charger depuis l'API uniquement celles choisies
-    for (const equipe of apiTeams) {
-        try {
-            const apiPlayers = await fetchRosterWithDraft(equipe.id, equipe.name);
-            joueursParEquipe[equipe.name] = apiPlayers;
-        } catch (err) {
-            console.error(`Erreur API pour ${equipe.name}:`, err);
-        }
-    }
-}
-
-// ---------------------------------------------------------
-// 3️⃣ Fonctions utilitaires du jeu (identiques)
-// ---------------------------------------------------------
-function remplirSuggestions() {
-    const tousLesNoms = getAllPlayers()
-        .map(j => j.nom)
-        .filter((value, index, self) => self.indexOf(value) === index)
-        .sort((a, b) => a.localeCompare(b));
-    datalist.innerHTML = "";
-    tousLesNoms.forEach(nom => {
-        const option = document.createElement("option");
-        option.value = nom;
-        datalist.appendChild(option);
+        const person = info.people[0];
+        return {
+          nom: p.person.fullName,
+          indices: [
+            `#${p.jerseyNumber || "?"} ${teamName}`,
+            p.position.code === "G" ? `Catches ${person.shootsCatches || "Left"}` : `Shoots ${person.shootsCatches || "Right"}`,
+            `(${p.position.code})`,
+            person.draft ? `Draft ${person.draft.year}` : "Draft info unavailable"
+          ]
+        };
+      } catch (err) {
+        console.warn(`Erreur joueur ${p.person.fullName}:`, err);
+        return null;
+      }
     });
+
+    const result = await Promise.all(promises);
+    return result.filter(j => j !== null);
+  } catch (err) {
+    console.error(`Erreur équipe ${teamName}:`, err);
+    return [];
+  }
+}
+
+// -------------------------
+// 2️⃣ Charger toutes les équipes via le proxy
+// -------------------------
+async function loadAllTeams() {
+  try {
+    const teamsResp = await fetch("http://localhost:3000/teams");
+    const teamsData = await teamsResp.json();
+
+    for (const t of teamsData.teams) {
+      try {
+        const players = await fetchRoster(t.id, t.name);
+        joueursParEquipe[t.name] = players;
+      } catch (err) {
+        console.warn(`Impossible de récupérer ${t.name}`, err);
+      }
+    }
+  } catch (err) {
+    console.error("Impossible de récupérer les équipes via proxy:", err);
+  }
+}
+
+// -------------------------
+// 3️⃣ Fonctions utilitaires du jeu
+// -------------------------
+function getAllPlayers() {
+  let all = [];
+  for (const e in joueursParEquipe) all = all.concat(joueursParEquipe[e]);
+  return all;
 }
 
 function melangerArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
 }
 
-function getAllPlayers() {
-    let tousLesJoueurs = [];
-    for (const equipe in joueursParEquipe) {
-        tousLesJoueurs = tousLesJoueurs.concat(joueursParEquipe[equipe]);
-    }
-    return tousLesJoueurs;
+function remplirSuggestions() {
+  const tousLesNoms = getAllPlayers()
+    .map(j => j.nom)
+    .filter((v, i, self) => self.indexOf(v) === i)
+    .sort((a, b) => a.localeCompare(b));
+  datalist.innerHTML = "";
+  tousLesNoms.forEach(nom => {
+    const option = document.createElement("option");
+    option.value = nom;
+    datalist.appendChild(option);
+  });
 }
 
 function initialiserJeu(nb) {
-    const copie = JSON.parse(JSON.stringify(getAllPlayers()));
-    melangerArray(copie);
-    joueurs = copie.slice(0, nb);
-    remplirSuggestions();
+  const copie = JSON.parse(JSON.stringify(getAllPlayers()));
+  melangerArray(copie);
+  joueurs = copie.slice(0, nb);
+  remplirSuggestions();
 }
 
 function afficherIndice() {
-    const joueur = joueurs[joueurIndex];
-    if (indiceIndex < joueur.indices.length) {
-        const indicesActuels = joueur.indices.slice(0, indiceIndex + 1).join(" / ");
-        indiceDiv.textContent = `Hint ${indiceIndex + 1} : ${indicesActuels}`;
-        indiceIndex++;
-    }
-    progressionDiv.textContent = `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
-    messageDiv.textContent = `Guesses Left : ${essaisRestants}`;
-    reponseInput.value = "";
-    reponseInput.focus();
+  const joueur = joueurs[joueurIndex];
+  if (indiceIndex < joueur.indices.length) {
+    const indicesActuels = joueur.indices.slice(0, indiceIndex + 1).join(" / ");
+    indiceDiv.textContent = `Hint ${indiceIndex + 1} : ${indicesActuels}`;
+    indiceIndex++;
+  }
+  progressionDiv.textContent = `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
+  messageDiv.textContent = `Guesses Left : ${essaisRestants}`;
+  reponseInput.value = "";
+  reponseInput.focus();
 }
 
 function passeAuJoueurSuivant() {
-    joueurIndex++;
-    indiceIndex = 0;
-    essaisRestants = 4;
-    indiceDiv.textContent = "";
-
-    if (joueurIndex >= joueurs.length) {
-        finDeJeu();
-        return;
-    }
-
-    progressionDiv.textContent = `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
-    enAttenteDeSuivant = false;
-    boutonValider.textContent = "Guess";
-    boutonHint.style.display = "inline-block";
-    boutonSkip.style.display = "inline-block";
-
-    afficherIndice();
+  joueurIndex++;
+  indiceIndex = 0;
+  essaisRestants = 4;
+  indiceDiv.textContent = "";
+  if (joueurIndex >= joueurs.length) {
+    finDeJeu();
+    return;
+  }
+  progressionDiv.textContent = `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
+  enAttenteDeSuivant = false;
+  boutonValider.textContent = "Guess";
+  boutonHint.style.display = "inline-block";
+  boutonSkip.style.display = "inline-block";
+  afficherIndice();
 }
 
 function finDeJeu() {
-    indiceDiv.textContent = "The Game is Over !";
-    messageDiv.textContent = `Your Final Score Is ${score} Out of ${joueurs.length}. Thanks For Playing!`;
-    reponseInput.style.display = "none";
-    boutonValider.style.display = "none";
-    progressionDiv.textContent = "";
-    boutonSkip.style.display = "none";
-    boutonHint.style.display = "none";
-    boutonRejouer.style.display = "inline-block";
+  indiceDiv.textContent = "The Game is Over !";
+  messageDiv.textContent = `Your Final Score Is ${score} Out of ${joueurs.length}. Thanks For Playing!`;
+  reponseInput.style.display = "none";
+  boutonValider.style.display = "none";
+  progressionDiv.textContent = "";
+  boutonSkip.style.display = "none";
+  boutonHint.style.display = "none";
+  boutonRejouer.style.display = "inline-block";
 }
 
-// ---------------------------------------------------------
+// -------------------------
 // 4️⃣ Gestion des événements
-// ---------------------------------------------------------
+// -------------------------
 boutonSkip.addEventListener("click", () => {
-    const joueur = joueurs[joueurIndex];
+  const joueur = joueurs[joueurIndex];
+  boutonValider.textContent = "Next";
+  boutonValider.style.marginTop = "4px";
+  enAttenteDeSuivant = true;
+  boutonHint.style.display = "none";
+  boutonSkip.style.display = "none";
+  messageDiv.innerHTML = `Skipped! The correct answer was <span style="color: green;">${joueur.nom}</span>.`;
+});
+
+boutonValider.addEventListener("click", () => {
+  if (enAttenteDeSuivant) {
+    passeAuJoueurSuivant();
+    boutonValider.textContent = "Guess";
+    enAttenteDeSuivant = false;
+    return;
+  }
+  const joueur = joueurs[joueurIndex];
+  const reponse = reponseInput.value.trim().toLowerCase();
+  const bonneReponse = joueur.nom.toLowerCase();
+
+  if (reponse === "") {
+    messageDiv.textContent = "Enter a valid name";
+    messageDiv.style.fontStyle = "Italic";
+    setTimeout(() => {
+      messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
+      messageDiv.style.fontStyle = "Normal";
+    }, 2000);
+    return;
+  }
+
+  if (reponse === bonneReponse) {
+    score++;
+    messageDiv.innerHTML = `Nice Work! It was <span style="color: green;">${joueur.nom}</span> ! 🎉`;
     boutonValider.textContent = "Next";
     boutonValider.style.marginTop = "4px";
     enAttenteDeSuivant = true;
     boutonHint.style.display = "none";
     boutonSkip.style.display = "none";
-    messageDiv.innerHTML = `Skipped! The correct answer was <span style="color: green;">${joueur.nom}</span>.`;
-});
-
-boutonValider.addEventListener("click", () => {
-    if (enAttenteDeSuivant) {
-        passeAuJoueurSuivant();
-        boutonValider.textContent = "Guess";
-        enAttenteDeSuivant = false;
-        return;
-    }
-
-    const joueur = joueurs[joueurIndex];
-    const reponse = reponseInput.value.trim().toLowerCase();
-    const bonneReponse = joueur.nom.toLowerCase();
-
-    if (reponse === "") {
-        messageDiv.textContent = "Enter a valid name";
-        messageDiv.style.fontStyle = "Italic";
-        setTimeout(() => {
-            messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
-            messageDiv.style.fontStyle = "Normal";
-        }, 2000);
-        return;
-    }
-
-    if (reponse === bonneReponse) {
-        score++;
-        messageDiv.innerHTML = `Nice Work! It was <span style="color: green;">${joueur.nom}</span> ! 🎉`;
-        boutonValider.textContent = "Next";
-        boutonValider.style.marginTop = "4px";
-        enAttenteDeSuivant = true;
-        boutonHint.style.display = "none";
-        boutonSkip.style.display = "none";
+  } else {
+    essaisRestants--;
+    if (essaisRestants === 0) {
+      messageDiv.innerHTML = `Oops, The Answer Was <span style="color: green;">${joueur.nom}</span>.`;
+      boutonValider.textContent = "Next";
+      boutonValider.style.marginTop = "4px";
+      enAttenteDeSuivant = true;
+      boutonHint.style.display = "none";
+      boutonSkip.style.display = "none";
     } else {
-        essaisRestants--;
-        if (essaisRestants === 0) {
-            messageDiv.innerHTML = `Oops, The Answer Was <span style="color: green;">${joueur.nom}</span>.`;
-            boutonValider.textContent = "Next";
-            boutonValider.style.marginTop = "4px";
-            enAttenteDeSuivant = true;
-            boutonHint.style.display = "none";
-            boutonSkip.style.display = "none";
-        } else {
-            messageDiv.textContent = `Wrong Player. Guesses Left: ${essaisRestants}. New Hint.`;
-            setTimeout(afficherIndice, 2000);
-        }
+      messageDiv.textContent = `Wrong Player. Guesses Left: ${essaisRestants}. New Hint.`;
+      setTimeout(afficherIndice, 2000);
     }
+  }
 });
 
 boutonRejouer.addEventListener("click", () => {
-    joueurIndex = 0;
-    indiceIndex = 0;
-    essaisRestants = 4;
-    score = 0;
-    divJeu.style.display = "none";
-    document.getElementById("choix").style.display = "block";
-    reponseInput.style.display = "inline-block";
-    boutonValider.style.display = "inline-block";
-    boutonSkip.style.display = "inline-block";
-    boutonHint.style.display = "inline-block";
-    boutonRejouer.style.display = "none";
+  joueurIndex = 0;
+  indiceIndex = 0;
+  essaisRestants = 4;
+  score = 0;
+  divJeu.style.display = "none";
+  document.getElementById("choix").style.display = "block";
+  reponseInput.style.display = "inline-block";
+  boutonValider.style.display = "inline-block";
+  boutonSkip.style.display = "inline-block";
+  boutonHint.style.display = "inline-block";
+  boutonRejouer.style.display = "none";
 });
 
 boutonHint.addEventListener("click", () => {
-    if (essaisRestants <= 1) {
-        messageDiv.textContent = "No hints left.";
-        setTimeout(afficherIndice, 2000);
-        return;
-    }
-    essaisRestants--;
-    afficherIndice();
+  if (essaisRestants <= 1) {
+    messageDiv.textContent = "No hints left.";
+    setTimeout(afficherIndice, 2000);
+    return;
+  }
+  essaisRestants--;
+  afficherIndice();
 });
 
 btnCommencer.addEventListener("click", async () => {
-    const nbJoueurs = parseInt(selectNbJoueurs.value, 10);
-    if (isNaN(nbJoueurs) || nbJoueurs <= 0) {
-        alert("Please select a valid number of players.");
-        return;
-    }
-    document.getElementById("choix").style.display = "none";
-    divJeu.style.display = "block";
-    boutonHint.style.display = "inline-block";
+  const nbJoueurs = parseInt(selectNbJoueurs.value, 10);
+  if (isNaN(nbJoueurs) || nbJoueurs <= 0) {
+    alert("Please select a valid number of players.");
+    return;
+  }
+  document.getElementById("choix").style.display = "none";
+  divJeu.style.display = "block";
+  boutonHint.style.display = "inline-block";
 
-    joueurIndex = 0;
-    indiceIndex = 0;
-    essaisRestants = 4;
-    score = 0;
+  joueurIndex = 0;
+  indiceIndex = 0;
+  essaisRestants = 4;
+  score = 0;
 
-    messageDiv.textContent = "Loading players… please wait.";
-    await loadAllTeams();  // Charger toutes les équipes hybrides
-    
+  messageDiv.textContent = "Loading players… please wait.";
+  await loadAllTeams();  // ✅ charge toutes les équipes via proxy
 
-    initialiserJeu(nbJoueurs);
-    afficherIndice();
-    messageDiv.textContent = "Guesses Left 4";
+  initialiserJeu(nbJoueurs);
+  afficherIndice();
+  messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
 });
-
-
-
