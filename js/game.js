@@ -1224,13 +1224,20 @@ boutonRejouer.addEventListener("click", () => {
   indiceIndex = 0;
   essaisRestants = 4;
   score = 0;
+
   divJeu.style.display = "none";
   document.getElementById("choix").style.display = "block";
+
+  // Réaffichage des éléments du jeu
   reponseInput.style.display = "inline-block";
   boutonValider.style.display = "inline-block";
   boutonSkip.style.display = "inline-block";
   boutonHint.style.display = "inline-block";
   boutonRejouer.style.display = "none";
+
+  // Réinitialisation des messages et indices
+  indiceDiv.textContent = "";
+  messageDiv.textContent = "";
 });
 
 boutonHint.addEventListener("click", () => {
@@ -1252,15 +1259,18 @@ btnCommencer.addEventListener("click", async () => {
   document.getElementById("choix").style.display = "none";
   divJeu.style.display = "block";
   boutonHint.style.display = "inline-block";
+  
 
   joueurIndex = 0;
   indiceIndex = 0;
   essaisRestants = 4;
   score = 0;
 
+  
   messageDiv.textContent = "Loading players… please wait...";
   await loadAllTeams();
   initialiserJeu(nbJoueurs);
+  indiceDiv.textContent= "";
   afficherIndice();
   messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
 });

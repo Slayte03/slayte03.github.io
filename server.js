@@ -8,22 +8,26 @@ const PORT = 3000;
 
 app.use(cors());
 
+const NHL_API_BASE = "https://api-web.nhle.com/api/v1";
+
 // -------------------------
 // Endpoint pour récupérer toutes les équipes
 // -------------------------
 app.get("/teams", async (req, res) => {
   try {
-    // Exemple endpoint API LNH
-    const response = await fetch("https://api-web.nhle.com/api/v1/teams"); 
+    const response = await fetch(`${NHL_API_BASE}/teams`);
     if (!response.ok) {
       console.error("Erreur NHL API:", response.status, response.statusText);
-      return res.json([]);
+      return res.json([]); // retourne un tableau vide si l'API échoue
     }
 
     const data = await response.json();
-    // Selon la structure de l'API nhle.com, tu devras peut-être adapter
-    // par ex. data.data.teams ou autre
-    res.json(data?.teams || []);
+    if (!data.teams || !Array.isArray(data.teams)) {
+      console.warn("Format inattendu des données NHL:", data);
+      return res.json([]);
+    }
+
+    res.json(data.teams);
   } catch (err) {
     console.error("Erreur fetch NHL Teams:", err);
     res.json([]);
@@ -36,15 +40,16 @@ app.get("/teams", async (req, res) => {
 app.get("/roster/:teamId", async (req, res) => {
   const { teamId } = req.params;
   try {
-    const response = await fetch(`https://api-web.nhle.com/api/v1/teams/${teamId}/roster`); 
+    const response = await fetch(`${NHL_API_BASE}/teams/${teamId}?expand=team.roster`);
     if (!response.ok) {
       console.error(`Erreur NHL Roster ${teamId}:`, response.status, response.statusText);
       return res.json({ roster: [] });
     }
 
     const data = await response.json();
-    // Adapter en fonction du JSON retourné par nhle.com
-    const roster = data?.roster || [];
+    const roster = data?.teams?.[0]?.roster?.roster;
+    if (!Array.isArray(roster)) return res.json({ roster: [] });
+
     res.json({ roster });
   } catch (err) {
     console.error(`Erreur fetch roster ${teamId}:`, err);
@@ -53,28 +58,10 @@ app.get("/roster/:teamId", async (req, res) => {
 });
 
 // -------------------------
-// Endpoint pour récupérer un joueur par ID
-// -------------------------
-app.get("/player/:playerId", async (req, res) => {
-  const { playerId } = req.params;
-  try {
-    const response = await fetch(`https://api-web.nhle.com/api/v1/people/${playerId}`);
-    if (!response.ok) {
-      console.error(`Erreur NHL Player ${playerId}:`, response.status, response.statusText);
-      return res.json({ people: [] });
-    }
-
-    const data = await response.json();
-    const people = data?.people || [];
-    res.json({ people });
-  } catch (err) {
-    console.error(`Erreur fetch player ${playerId}:`, err);
-    res.json({ people: [] });
-  }
-});
-
 app.listen(PORT, () => {
   console.log(`Proxy NHL API running on http://localhost:${PORT}`);
 });
+
+
 
 
