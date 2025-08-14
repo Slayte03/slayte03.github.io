@@ -14,9 +14,7 @@ const boutonSkip = document.getElementById("boutonSkip");
 const boutonHint = document.getElementById("boutonNextHint");
 const boutonRejouer = document.getElementById("boutonRejouer");
 
-// -------------------------
 // Variables du jeu
-// -------------------------
 let joueursParEquipe = {};
 let joueurs = [];
 let joueurIndex = 0;
@@ -1011,62 +1009,75 @@ const localTeams = {
         ]
 };
 
-// -------------------------
-// 1️⃣ Récupérer le roster via le proxy avec Promise.all
-// -------------------------
+async function loadAllTeams() {
+  let teamsData = [];
+  try {
+    const teamsResp = await fetch("http://localhost:3000/teams");
+    teamsData = await teamsResp.json();
+    if (!Array.isArray(teamsData) || teamsData.length === 0) {
+      console.warn("Proxy returned empty or invalid teams, using local data.");
+      joueursParEquipe = { ...localTeams };
+      return;
+    }
+  } catch (err) {
+    console.warn("Impossible de récupérer les équipes via proxy, utilisation des données locales.", err);
+    joueursParEquipe = { ...localTeams };
+    return;
+  }
+
+  for (const t of teamsData) {
+    try {
+      const teamId = t.id || t.TeamID;
+      const teamName = t.name || t.Name;
+      const resp = await fetch(`http://localhost:3000/roster/${teamId}`);
+      const data = await resp.json();
+      if (!data.roster || !Array.isArray(data.roster)) {
+        console.warn(`Roster vide pour ${teamName}`);
+        joueursParEquipe[teamName] = [];
+        continue;
+      }
+
+      joueursParEquipe[teamName] = data.roster.map(p => ({
+        nom: p.person?.fullName || p.fullName || "Unknown",
+        indices: [
+          `#${p.jerseyNumber || p.Jersey || "?"} ${teamName}`,
+          p.position?.code === "G" ? `Catches ${p.shootsCatches || "Left"}` : `Shoots ${p.shootsCatches || "Right"}`,
+          `(${p.position?.code || p.Position || "?"})`,
+          p.draft?.year ? `Draft ${p.draft.year}` : "Draft info unavailable"
+        ]
+      }));
+    } catch (err) {
+      console.warn(`Impossible de récupérer le roster pour ${t.name || t.Name}`, err);
+      joueursParEquipe[t.name || t.Name] = [];
+    }
+  }
+}
+
 async function fetchRoster(teamId, teamName) {
   try {
-    const rosterResp = await fetch(`http://localhost:3000/roster/${teamId}`);
-    const roster = await rosterResp.json();
+    const resp = await fetch(`http://localhost:3000/roster/${teamId}`);
+    const data = await resp.json();
 
-    const promises = roster.roster.map(async (p) => {
-      try {
-        const infoResp = await fetch(`http://localhost:3000/player/${p.person.id}`);
-        const info = await infoResp.json();
-        const person = info.people[0];
-        return {
-          nom: p.person.fullName,
-          indices: [
-            `#${p.jerseyNumber || "?"} ${teamName}`,
-            p.position.code === "G" ? `Catches ${person.shootsCatches || "Left"}` : `Shoots ${person.shootsCatches || "Right"}`,
-            `(${p.position.code})`,
-            person.draft ? `Draft ${person.draft.year}` : "Draft info unavailable"
-          ]
-        };
-      } catch (err) {
-        console.warn(`Erreur joueur ${p.person.fullName}:`, err);
-        return null;
-      }
-    });
+    if (!data.roster || !Array.isArray(data.roster)) {
+      console.warn(`Roster vide pour ${teamName}`, data);
+      return [];
+    }
 
-    const result = await Promise.all(promises);
-    return result.filter(j => j !== null);
+    return data.roster.map(p => ({
+      nom: p.person?.fullName || p.fullName || "Unknown",
+      indices: [
+        `#${p.jerseyNumber || p.Jersey || "?"} ${teamName}`,
+        p.position?.code === "G" ? `Catches ${p.shootsCatches || "Left"}` : `Shoots ${p.shootsCatches || "Right"}`,
+        `(${p.position?.code || p.Position || "?"})`,
+        p.draft?.year ? `Draft ${p.draft.year}` : "Draft info unavailable"
+      ]
+    }));
   } catch (err) {
-    console.error(`Erreur équipe ${teamName}:`, err);
+    console.error(`Erreur récupération roster ${teamName}:`, err);
     return [];
   }
 }
 
-// -------------------------
-// 2️⃣ Charger toutes les équipes via le proxy
-// -------------------------
-async function loadAllTeams() {
-  try {
-    const teamsResp = await fetch("http://localhost:3000/teams");
-    const teamsData = await teamsResp.json();
-
-    for (const t of teamsData.teams) {
-      try {
-        const players = await fetchRoster(t.id, t.name);
-        joueursParEquipe[t.name] = players;
-      } catch (err) {
-        console.warn(`Impossible de récupérer ${t.name}`, err);
-      }
-    }
-  } catch (err) {
-    console.error("Impossible de récupérer les équipes via proxy:", err);
-  }
-}
 
 // -------------------------
 // 3️⃣ Fonctions utilitaires du jeu
@@ -1106,6 +1117,7 @@ function initialiserJeu(nb) {
 
 function afficherIndice() {
   const joueur = joueurs[joueurIndex];
+  if (!joueur) return;
   if (indiceIndex < joueur.indices.length) {
     const indicesActuels = joueur.indices.slice(0, indiceIndex + 1).join(" / ");
     indiceDiv.textContent = `Hint ${indiceIndex + 1} : ${indicesActuels}`;
@@ -1150,6 +1162,7 @@ function finDeJeu() {
 // -------------------------
 boutonSkip.addEventListener("click", () => {
   const joueur = joueurs[joueurIndex];
+  if (!joueur) return;
   boutonValider.textContent = "Next";
   boutonValider.style.marginTop = "4px";
   enAttenteDeSuivant = true;
@@ -1159,13 +1172,16 @@ boutonSkip.addEventListener("click", () => {
 });
 
 boutonValider.addEventListener("click", () => {
+  const joueur = joueurs[joueurIndex];
+  if (!joueur) return;
+
   if (enAttenteDeSuivant) {
     passeAuJoueurSuivant();
     boutonValider.textContent = "Guess";
     enAttenteDeSuivant = false;
     return;
   }
-  const joueur = joueurs[joueurIndex];
+
   const reponse = reponseInput.value.trim().toLowerCase();
   const bonneReponse = joueur.nom.toLowerCase();
 
@@ -1242,9 +1258,8 @@ btnCommencer.addEventListener("click", async () => {
   essaisRestants = 4;
   score = 0;
 
-  messageDiv.textContent = "Loading players… please wait.";
-  await loadAllTeams();  // ✅ charge toutes les équipes via proxy
-
+  messageDiv.textContent = "Loading players… please wait...";
+  await loadAllTeams();
   initialiserJeu(nbJoueurs);
   afficherIndice();
   messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
