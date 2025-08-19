@@ -655,7 +655,7 @@ const localTeams = {
             { nom: "Alexis Lafreniere", indices: ["#13 New York Rangers", "Shoots Left", "(RW,LW)", "Draft 2020"] },
             { nom: "Vincent Trocheck", indices: ["#16 New York Rangers", "Shoots Right", "(C)", "Draft 2011"] },
             { nom: "Will Cuylle", indices: ["#50 New York Rangers", "Shoots Left", "(LW)", "Draft 2020"] },
-            { nom: "Taylor Raddysh", indices: ["#89 New York Rangers", "Shoots Right", "(RW)", "Draft 2016"] },
+            { nom: "Taylor Raddysh", indices: ["#14 New York Rangers", "Shoots Right", "(RW)", "Draft 2016"] },
             { nom: "Juuso Parssinen", indices: ["#71 New York Rangers", "Shoots Left", "(C,LW)", "Draft 2019"] },
             { nom: "Sam Carrick", indices: ["#39 New York Rangers", "Shoots Right", "(C,RW)", "Draft 2010"] },
             { nom: "Adam Edstrom", indices: ["#84 New York Rangers", "Shoots Left", "(C,W)", "Draft 2019"] },
@@ -664,7 +664,7 @@ const localTeams = {
 
             // Défenseurs
             { nom: "Adam Fox", indices: ["#23 New York Rangers", "Shoots Right", "(LD)", "Draft 2016"] },
-            //{ nom: "Vladislav Gavrikov", indices: ["#84 New York Rangers", "Shoots Left", "(LD)", "Draft 2015"] },
+            { nom: "Vladislav Gavrikov", indices: ["#44 New York Rangers", "Shoots Left", "(LD)", "Draft 2015"] },
             { nom: "William Borgen", indices: ["#17 New York Rangers", "Shoots Right", "(RD)", "Draft 2015"] },
             { nom: "Carson Soucy", indices: ["#24 New York Rangers", "Shoots Left", "(LD)", "Draft 2013"] },
             { nom: "Braden Schneider", indices: ["#4 New York Rangers", "Shoots Right", "(RD)", "Draft 2020"] },
