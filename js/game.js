@@ -157,7 +157,7 @@ const localTeams = {
             // Attaquants
             { nom: "Tyler Toffoli", indices: ["#73 San Jose Sharks", "Shoots Right", "(RW)", "Draft 2010"] },
             { nom: "Alexander Wennberg", indices: ["#21 San Jose Sharks", "Shoots Left", "(C)", "Draft 2013"] },
-            { nom: "Barclay Goodrow", indices: ["#23 San Jose Sharks", "Shoots Left", "(C)", "Draft Undreafted"] },
+            { nom: "Barclay Goodrow", indices: ["#23 San Jose Sharks", "Shoots Left", "(C)", "Draft Undrafted"] },
             { nom: "Jeff Skinner", indices: ["#53 San Jose Sharks", "Shoots Left", "(LW)", "Draft 2010"] },
             { nom: "Adam Gaudette", indices: ["#81 San Jose Sharks", "Shoots Right", "(RW)", "Draft 2015"] },
             { nom: "Carl Grundström", indices: ["#91 San Jose Sharks", "Shoots Left", "(LW)", "Draft 2016"] },
