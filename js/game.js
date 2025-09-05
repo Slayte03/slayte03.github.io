@@ -803,7 +803,7 @@ const localTeams = {
 
         "Buffalo Sabres": [
             // Attaquants
-            { nom: "Joshua Norris", indices: ["#13 Buffalo Sabres", "Shoots Left", "(C)", "Draft 2017"] },
+            { nom: "Joshua Norris", indices: ["#9 Buffalo Sabres", "Shoots Left", "(C)", "Draft 2017"] },
             { nom: "Tage Thompson", indices: ["#72 Buffalo Sabres", "Shoots Right", "(C, RW)", "Draft 2016"] },
             { nom: "Ryan McLeod", indices: ["#71 Buffalo Sabres", "Shoots Left", "(C, LW)", "Draft 2018"] },
             { nom: "Jason Zucker", indices: ["#17 Buffalo Sabres", "Shoots Left", "(LW)", "Draft 2010"] },
@@ -812,7 +812,7 @@ const localTeams = {
             { nom: "Jack Quinn", indices: ["#22 Buffalo Sabres", "Shoots Right", "(RW, LW)", "Draft 2020"] },
             { nom: "Peyton Krebs", indices: ["#19 Buffalo Sabres", "Shoots Left", "(C, LW)", "Draft 2019"] },
             { nom: "Beck Malenstyn", indices: ["#29 Buffalo Sabres", "Shoots Left", "(LW)", "Draft 2016"] },
-            { nom: "Zach Benson", indices: ["#9 Buffalo Sabres", "Shoots Left", "(LW, RW)", "Draft 2023"] },
+            { nom: "Zach Benson", indices: ["#6 Buffalo Sabres", "Shoots Left", "(LW, RW)", "Draft 2023"] },
             { nom: "Jiri Kulich", indices: ["#20 Buffalo Sabres", "Shoots Left", "(C, LW)", "Draft 2022"] },
 
             // Défenseurs
@@ -1274,3 +1274,4 @@ btnCommencer.addEventListener("click", async () => {
   afficherIndice();
   messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
 });
+
