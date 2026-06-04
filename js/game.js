@@ -1010,22 +1010,25 @@ const localTeams = {
   ]
 };
 
-function getFlag(countryCode) {
-  const flags = {
-    CAN: "🇨🇦",
-    USA: "🇺🇸",
-    SWE: "🇸🇪",
-    FIN: "🇫🇮",
-    CZE: "🇨🇿",
-    RUS: "🇷🇺",
-    SUI: "🇨🇭",
-    GER: "🇩🇪",
-    FRA: "🇫🇷",
-    DEN: "🇩🇰",
-    NOR: "🇳🇴",
+function getFlagImg(country) {
+  if (!country) return "";
+
+  const map = {
+    CAN: "ca",
+    USA: "us",
+    SWE: "se",
+    FIN: "fi",
+    CZE: "cz",
+    RUS: "ru",
+    SUI: "ch",
+    GER: "de",
+    FRA: "fr",
+    DEN: "dk",
+    NOR: "no"
   };
 
-  return flags[countryCode] || "🏳️";
+  const code = map[country] || country.toLowerCase();
+  return `<img src="https://flagcdn.com/24x18/${code}.png" style="vertical-align:middle; margin-left:5px;">`;
 }
 
 async function loadAllTeams() {
@@ -1078,7 +1081,7 @@ async function loadAllTeams() {
           `Position ${player.position ?? "?"}`,
 
           `Age ${player.age ?? "?"}`,
-          `${getFlag(player.nationality)}`
+          `Nationality ${getFlagImg(player.nationality)}`
         ]
       }));
 
@@ -1131,7 +1134,7 @@ function afficherIndice() {
   if (!joueur) return;
   if (indiceIndex < joueur.indices.length) {
     const indicesActuels = joueur.indices.slice(0, indiceIndex + 1).join(" / ");
-    indiceDiv.textContent = `Hint ${indiceIndex + 1} : ${indicesActuels}`;
+    indiceDiv.innerHTML = `Hint ${indiceIndex + 1} : ${indicesActuels}`;
     indiceIndex++;
   }
   progressionDiv.textContent = `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
