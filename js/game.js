@@ -1128,8 +1128,15 @@ function revealPlayer(joueur) {
   ];
 
   indiceDiv.innerHTML = `
-    <strong>Answer:</strong> ${joueur.nom}<br>
-    ${reveal.join(" / ")}
+    <div>
+      <strong>Answer:</strong>
+      <span style="color: green; font-weight: bold;">
+        ${joueur.nom}
+      </span>
+    </div>
+    <div>
+      ${reveal.join(" / ")}
+    </div>
   `;
 }
 
