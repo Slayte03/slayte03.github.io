@@ -1117,12 +1117,19 @@ function getAllPlayers() {
 }
 
 function revealPlayer(joueur) {
-  messageDiv.innerHTML = `
+  const reveal = [
+    `#${joueur.numero ?? "?"} ${joueur.team ?? ""}`,
+    joueur.position === "G"
+      ? `Catches ${joueur.shootsCatches ?? "?"}`
+      : `Shoots ${joueur.shootsCatches ?? "?"}`,
+    `Position ${joueur.position ?? "?"}`,
+    `Age ${joueur.age ?? "?"}`,
+    `Nationality ${joueur.nationality ?? "?"}`
+  ];
+
+  indiceDiv.innerHTML = `
     <strong>Answer:</strong> ${joueur.nom}<br>
-    #${joueur.numero ?? "?"} ${joueur.team ?? ""}<br>
-    Position: ${joueur.position ?? "?"}<br>
-    Age: ${joueur.age ?? "?"}<br>
-    Nationality: ${joueur.nationality ?? "?"}
+    ${reveal.join(" / ")}
   `;
 }
 
@@ -1156,11 +1163,16 @@ function initialiserJeu(nb) {
 function afficherIndice() {
   const joueur = joueurs[joueurIndex];
   if (!joueur) return;
+
+  // ❌ STOP si déjà révélé
+  if (indiceIndex === "reveal") return;
+
   if (indiceIndex < joueur.indices.length) {
     const indicesActuels = joueur.indices.slice(0, indiceIndex + 1).join(" / ");
     indiceDiv.innerHTML = `Hint ${indiceIndex + 1} : ${indicesActuels}`;
     indiceIndex++;
   }
+
   progressionDiv.textContent = `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
   messageDiv.textContent = `Guesses Left : ${essaisRestants}`;
   reponseInput.value = "";
@@ -1215,6 +1227,7 @@ boutonSkip.addEventListener("click", () => {
   if (!joueur) return;
 
   revealPlayer(joueur);
+  indiceIndex = "reveal";
 
   reponseInput.style.display = "none";
 
