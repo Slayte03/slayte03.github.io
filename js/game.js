@@ -1084,6 +1084,14 @@ async function loadAllTeams() {
         id: player.id,
         nom: player.nom || "Unknown Player",
 
+        // ⭐ Conserver les données
+        team: teamName,
+        numero: player.numero,
+        position: player.position,
+        shootsCatches: player.shootsCatches,
+        age: player.age,
+        nationality: player.nationality,
+
         indices: [
           `#${player.numero ?? "?"} ${teamName}`,
 
@@ -1094,6 +1102,7 @@ async function loadAllTeams() {
           `Position ${player.position ?? "?"}`,
 
           `Age ${player.age ?? "?"}`,
+
           `Nationality ${getFlagImg(player.nationality)}`
         ]
       }));
@@ -1119,18 +1128,22 @@ function getAllPlayers() {
 function revealPlayer(joueur) {
   const reveal = [
     `#${joueur.numero ?? "?"} ${joueur.team ?? ""}`,
+
     joueur.position === "G"
       ? `Catches ${joueur.shootsCatches ?? "?"}`
       : `Shoots ${joueur.shootsCatches ?? "?"}`,
+
     `Position ${joueur.position ?? "?"}`,
+
     `Age ${joueur.age ?? "?"}`,
-    `Nationality ${joueur.nationality ?? "?"}`
+
+    `Nationality ${getFlagImg(joueur.nationality)}`
   ];
 
   indiceDiv.innerHTML = `
     <div>
       <strong>Answer:</strong>
-      <span style="color: green; font-weight: bold;">
+      <span style="color:green;font-weight:bold;">
         ${joueur.nom}
       </span>
     </div>
@@ -1270,18 +1283,18 @@ boutonValider.addEventListener("click", () => {
   }
 
   if (reponse === bonneReponse) {
-  score++;
+    score++;
 
-  revealPlayer(joueur); // ⭐ AJOUT ICI
+    revealPlayer(joueur); // ⭐ AJOUT ICI
 
-  reponseInput.style.display = "none";
+    reponseInput.style.display = "none";
 
-  boutonValider.textContent = "Next";
-  enAttenteDeSuivant = true;
+    boutonValider.textContent = "Next";
+    enAttenteDeSuivant = true;
 
-  boutonHint.style.display = "none";
-  boutonSkip.style.display = "none";
-} else {
+    boutonHint.style.display = "none";
+    boutonSkip.style.display = "none";
+  } else {
     essaisRestants--;
     if (essaisRestants === 0) {
       reponseInput.style.display = "none";
@@ -1349,15 +1362,15 @@ btnCommencer.addEventListener("click", async () => {
   messageDiv.textContent = "Loading players… please wait...";
   messageDiv.textContent = "Loading players… please wait...";
 
-const hasCache = loadCache();
+  const hasCache = loadCache();
 
-if (!hasCache) {
-  await loadAllTeams();
-}
+  if (!hasCache) {
+    await loadAllTeams();
+  }
 
-initialiserJeu(nbJoueurs);
+  initialiserJeu(nbJoueurs);
 
-messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
+  messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
   indiceDiv.textContent = "";
   afficherIndice();
   messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
