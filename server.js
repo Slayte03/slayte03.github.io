@@ -1,5 +1,3 @@
-// server.js
-
 const express = require("express");
 const cors = require("cors");
 
@@ -10,157 +8,90 @@ app.use(cors());
 
 const NHL_API_BASE = "https://api-web.nhle.com/v1";
 
+// 🔥 CACHE
+const rosterCache = {};
+
 // ------------------------------------
-// Toutes les équipes NHL
+// TEAMS
 // ------------------------------------
 app.get("/teams", async (req, res) => {
   try {
     const response = await fetch(`${NHL_API_BASE}/standings/now`);
-
-    if (!response.ok) {
-      throw new Error(`Erreur NHL API: ${response.status}`);
-    }
-
     const data = await response.json();
 
-    const teams = data.standings.map(team => ({
-      id: team.teamAbbrev.default,
-      name: team.teamName.default,
-      commonName: team.teamCommonName.default,
-      place: team.placeName.default,
-      logo: team.teamLogo
-    }));
+    const teams = (data.standings || [])
+      .map(t => ({
+        id: t.teamAbbrev?.default,
+        name: t.teamName?.default,
+        commonName: t.teamCommonName?.default
+      }))
+      .filter(t => t.id);
 
     res.json(teams);
   } catch (err) {
     console.error(err);
-    res.status(500).json({
-      error: "Impossible de récupérer les équipes"
-    });
+    res.json([]); // 🔥 jamais 500
   }
 });
 
 // ------------------------------------
-// Roster d'une équipe
-// Exemple:
-// /roster/MTL
-// /roster/BOS
-// /roster/STL
+// ROSTER (SAFE + CACHE)
 // ------------------------------------
 app.get("/roster/:teamAbbrev", async (req, res) => {
+  const teamAbbrev = req.params.teamAbbrev?.toUpperCase();
+
   try {
-    const { teamAbbrev } = req.params;
+    // 🔥 CACHE HIT
+    if (rosterCache[teamAbbrev]) {
+      return res.json(rosterCache[teamAbbrev]);
+    }
 
     const response = await fetch(
-      `https://api-web.nhle.com/v1/roster/${teamAbbrev.toUpperCase()}/current`
+      `${NHL_API_BASE}/roster/${teamAbbrev}/current`
     );
 
     if (!response.ok) {
-      throw new Error(`Erreur NHL API: ${response.status}`);
+      console.warn("Roster API fail:", teamAbbrev);
+      rosterCache[teamAbbrev] = [];
+      return res.json([]);
     }
 
     const data = await response.json();
 
-    const roster = [
-      ...(data.forwards || []),
-      ...(data.defensemen || []),
-      ...(data.goalies || [])
-    ];
+    const roster =
+      Array.isArray(data?.forwards) ||
+      Array.isArray(data?.defensemen) ||
+      Array.isArray(data?.goalies)
+        ? [
+            ...(data.forwards || []),
+            ...(data.defensemen || []),
+            ...(data.goalies || [])
+          ]
+        : [];
 
-    const joueurs = roster.map(player => ({
-      id: player.id,
-      nom: `${player.firstName?.default || ""} ${player.lastName?.default || ""}`.trim(),
-      numero: player.sweaterNumber,
-      position: player.positionCode,
-      shootsCatches: player.shootsCatches
+    const players = roster.map(p => ({
+      id: p.id,
+      nom: `${p.firstName?.default || ""} ${p.lastName?.default || ""}`.trim(),
+      numero: p.sweaterNumber ?? "?",
+      position: p.positionCode ?? "?",
+      shootsCatches: p.shootsCatches ?? "?"
     }));
 
-    res.json(joueurs);
+    // 🔥 STORE CACHE
+    rosterCache[teamAbbrev] = players;
+
+    return res.json(players);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      error: "Impossible de récupérer le roster"
-    });
+    console.error("ROSTER ERROR:", teamAbbrev, err);
+
+    rosterCache[teamAbbrev] = [];
+    return res.json([]); // 🔥 IMPORTANT
   }
 });
 
-// ------------------------------------
-// Informations détaillées d'un joueur
-// Exemple:
-// /player/8478402
-// ------------------------------------
-app.get("/player/:playerId", async (req, res) => {
-  try {
-    const { playerId } = req.params;
-
-    const response = await fetch(
-      `${NHL_API_BASE}/player/${playerId}/landing`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Erreur NHL API: ${response.status}`);
-    }
-
-    const player = await response.json();
-
-    res.json(player);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      error: "Impossible de récupérer le joueur"
-    });
-  }
-});
-
-// ------------------------------------
-// Classement NHL
-// ------------------------------------
-app.get("/standings", async (req, res) => {
-  try {
-    const response = await fetch(
-      `${NHL_API_BASE}/standings/now`
-    );
-
-    const standings = await response.json();
-
-    res.json(standings);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      error: "Impossible de récupérer le classement"
-    });
-  }
-});
-
-// ------------------------------------
-// Horaire NHL
-// Exemple:
-// /schedule/2026-06-03
-// ------------------------------------
-app.get("/schedule/:date", async (req, res) => {
-  try {
-    const { date } = req.params;
-
-    const response = await fetch(
-      `${NHL_API_BASE}/schedule/${date}`
-    );
-
-    const schedule = await response.json();
-
-    res.json(schedule);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      error: "Impossible de récupérer l'horaire"
-    });
-  }
-});
-
-// ------------------------------------
 app.listen(PORT, () => {
-  console.log(`Serveur démarré : http://localhost:${PORT}`);
+  console.log(`Serveur OK http://localhost:${PORT}`);
 });
-
 
 
 

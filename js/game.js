@@ -13,6 +13,7 @@ const boutonValider = document.getElementById("boutonValider");
 const boutonSkip = document.getElementById("boutonSkip");
 const boutonHint = document.getElementById("boutonNextHint");
 const boutonRejouer = document.getElementById("boutonRejouer");
+const API_BASE = "https://nhl-api-backend.onrender.com";
 
 // Variables du jeu
 let joueursParEquipe = {};
@@ -1013,19 +1014,17 @@ async function loadAllTeams() {
   let teamsData = [];
 
   try {
-    const teamsResp = await fetch(
-      "http://localhost:3000/teams"
-    );
-
+    const teamsResp = await fetch(`${API_BASE}/teams`);
     teamsData = await teamsResp.json();
 
     if (!Array.isArray(teamsData) || teamsData.length === 0) {
-      joueursParEquipe = {};
+      console.warn("Teams API vide → fallback localTeams");
+      joueursParEquipe = { ...localTeams };
       return;
     }
   } catch (err) {
-    console.error(err);
-    joueursParEquipe = {};
+    console.error("Erreur teams API", err);
+    joueursParEquipe = { ...localTeams };
     return;
   }
 
@@ -1036,32 +1035,32 @@ async function loadAllTeams() {
       const teamAbbrev = team.id;
       const teamName = team.commonName || team.name;
 
-      const resp = await fetch(
-        `http://localhost:3000/roster/${teamAbbrev}`
-      );
+      const resp = await fetch(`${API_BASE}/roster/${teamAbbrev}`);
+      const data = await resp.json();
 
-      const players = await resp.json();
+      const players = Array.isArray(data) ? data : [];
+
+      if (!Array.isArray(data)) {
+        console.warn(`Roster invalide pour ${teamName}`, data);
+      }
+
+      console.log(`TEAM: ${teamName}`, players.length);
 
       joueursParEquipe[teamName] = players.map(player => ({
         id: player.id,
-        nom: player.nom,
+        nom: player.nom || "Unknown Player",
 
         indices: [
-          `#${player.numero || "?"} ${teamName}`,
-
+          `#${player.numero ?? "?"} ${teamName}`,
           player.position === "G"
-            ? `Catches ${player.shootsCatches || "?"}`
-            : `Shoots ${player.shootsCatches || "?"}`,
-
-          `Position ${player.position || "?"}`
+            ? `Catches ${player.shootsCatches ?? "?"}`
+            : `Shoots ${player.shootsCatches ?? "?"}`,
+          `Position ${player.position ?? "?"}`
         ]
       }));
-    } catch (err) {
-      console.error(
-        `Erreur équipe ${team.name}`,
-        err
-      );
 
+    } catch (err) {
+      console.error(`Erreur équipe ${team.name}`, err);
       joueursParEquipe[team.name] = [];
     }
   }
