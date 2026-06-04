@@ -1161,17 +1161,29 @@ function passeAuJoueurSuivant() {
   joueurIndex++;
   indiceIndex = 0;
   essaisRestants = 5;
+
   indiceDiv.textContent = "";
+
+  // 🔥 HIDE INPUT
+  reponseInput.style.display = "none";
+
   if (joueurIndex >= joueurs.length) {
     finDeJeu();
     return;
   }
-  progressionDiv.textContent = `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
+
+  progressionDiv.textContent =
+    `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
+
   enAttenteDeSuivant = false;
   boutonValider.textContent = "Guess";
   boutonHint.style.display = "inline-block";
   boutonSkip.style.display = "inline-block";
+
   afficherIndice();
+
+  // 🔥 SHOW INPUT BACK
+  reponseInput.style.display = "inline-block";
 }
 
 function finDeJeu() {
@@ -1191,6 +1203,7 @@ function finDeJeu() {
 boutonSkip.addEventListener("click", () => {
   const joueur = joueurs[joueurIndex];
   if (!joueur) return;
+  reponseInput.style.display = "none";
   boutonValider.textContent = "Next";
   boutonValider.style.marginTop = "4px";
   enAttenteDeSuivant = true;
@@ -1225,6 +1238,7 @@ boutonValider.addEventListener("click", () => {
 
   if (reponse === bonneReponse) {
     score++;
+    reponseInput.style.display = "none";
     messageDiv.innerHTML = `Nice Work! It was <span style="color: green;">${joueur.nom}</span> ! 🎉`;
     boutonValider.textContent = "Next";
     boutonValider.style.marginTop = "4px";
@@ -1234,6 +1248,7 @@ boutonValider.addEventListener("click", () => {
   } else {
     essaisRestants--;
     if (essaisRestants === 0) {
+      reponseInput.style.display = "none";
       messageDiv.innerHTML = `Oops, The Answer Was <span style="color: green;">${joueur.nom}</span>.`;
       boutonValider.textContent = "Next";
       boutonValider.style.marginTop = "4px";
