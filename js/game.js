@@ -1031,6 +1031,19 @@ function getFlagImg(country) {
   return `<img src="https://flagcdn.com/24x18/${code}.png" style="vertical-align:middle; margin-left:5px;">`;
 }
 
+function loadCache() {
+  const cache = localStorage.getItem("nhlCache");
+  if (cache) {
+    try {
+      joueursParEquipe = JSON.parse(cache);
+      return true;
+    } catch (e) {
+      console.error("Cache localStorage corrompu");
+    }
+  }
+  return false;
+}
+
 async function loadAllTeams() {
   let teamsData = [];
 
@@ -1090,6 +1103,7 @@ async function loadAllTeams() {
       joueursParEquipe[team.name] = [];
     }
   }
+  localStorage.setItem("nhlCache", JSON.stringify(joueursParEquipe));
 }
 
 
@@ -1282,10 +1296,23 @@ btnCommencer.addEventListener("click", async () => {
 
 
   messageDiv.textContent = "Loading players… please wait...";
+  messageDiv.textContent = "Loading players… please wait...";
+
+const hasCache = loadCache();
+
+if (!hasCache) {
   await loadAllTeams();
-  initialiserJeu(nbJoueurs);
+}
+
+initialiserJeu(nbJoueurs);
+
+messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
   indiceDiv.textContent = "";
   afficherIndice();
   messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
 });
+
+function clearNHLCache() {
+  localStorage.removeItem("nhlCache");
+}
 
