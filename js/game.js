@@ -19,7 +19,7 @@ let joueursParEquipe = {};
 let joueurs = [];
 let joueurIndex = 0;
 let indiceIndex = 0;
-let essaisRestants = 4;
+let essaisRestants = 5;
 let score = 0;
 let enAttenteDeSuivant = false;
 
@@ -1011,70 +1011,59 @@ const localTeams = {
 
 async function loadAllTeams() {
   let teamsData = [];
+
   try {
-    const teamsResp = await fetch("http://localhost:3000/teams");
+    const teamsResp = await fetch(
+      "http://localhost:3000/teams"
+    );
+
     teamsData = await teamsResp.json();
+
     if (!Array.isArray(teamsData) || teamsData.length === 0) {
-      console.warn("Proxy returned empty or invalid teams, using local data.");
-      joueursParEquipe = { ...localTeams };
+      joueursParEquipe = {};
       return;
     }
   } catch (err) {
-    console.warn("Impossible de récupérer les équipes via proxy, utilisation des données locales.", err);
-    joueursParEquipe = { ...localTeams };
+    console.error(err);
+    joueursParEquipe = {};
     return;
   }
 
-  for (const t of teamsData) {
-    try {
-      const teamId = t.id || t.TeamID;
-      const teamName = t.name || t.Name;
-      const resp = await fetch(`http://localhost:3000/roster/${teamId}`);
-      const data = await resp.json();
-      if (!data.roster || !Array.isArray(data.roster)) {
-        console.warn(`Roster vide pour ${teamName}`);
-        joueursParEquipe[teamName] = [];
-        continue;
-      }
+  joueursParEquipe = {};
 
-      joueursParEquipe[teamName] = data.roster.map(p => ({
-        nom: p.person?.fullName || p.fullName || "Unknown",
+  for (const team of teamsData) {
+    try {
+      const teamAbbrev = team.id;
+      const teamName = team.commonName || team.name;
+
+      const resp = await fetch(
+        `http://localhost:3000/roster/${teamAbbrev}`
+      );
+
+      const players = await resp.json();
+
+      joueursParEquipe[teamName] = players.map(player => ({
+        id: player.id,
+        nom: player.nom,
+
         indices: [
-          `#${p.jerseyNumber || p.Jersey || "?"} ${teamName}`,
-          p.position?.code === "G" ? `Catches ${p.shootsCatches || "Left"}` : `Shoots ${p.shootsCatches || "Right"}`,
-          `(${p.position?.code || p.Position || "?"})`,
-          p.draft?.year ? `Draft ${p.draft.year}` : "Draft info unavailable"
+          `#${player.numero || "?"} ${teamName}`,
+
+          player.position === "G"
+            ? `Catches ${player.shootsCatches || "?"}`
+            : `Shoots ${player.shootsCatches || "?"}`,
+
+          `Position ${player.position || "?"}`
         ]
       }));
     } catch (err) {
-      console.warn(`Impossible de récupérer le roster pour ${t.name || t.Name}`, err);
-      joueursParEquipe[t.name || t.Name] = [];
+      console.error(
+        `Erreur équipe ${team.name}`,
+        err
+      );
+
+      joueursParEquipe[team.name] = [];
     }
-  }
-}
-
-async function fetchRoster(teamId, teamName) {
-  try {
-    const resp = await fetch(`http://localhost:3000/roster/${teamId}`);
-    const data = await resp.json();
-
-    if (!data.roster || !Array.isArray(data.roster)) {
-      console.warn(`Roster vide pour ${teamName}`, data);
-      return [];
-    }
-
-    return data.roster.map(p => ({
-      nom: p.person?.fullName || p.fullName || "Unknown",
-      indices: [
-        `#${p.jerseyNumber || p.Jersey || "?"} ${teamName}`,
-        p.position?.code === "G" ? `Catches ${p.shootsCatches || "Left"}` : `Shoots ${p.shootsCatches || "Right"}`,
-        `(${p.position?.code || p.Position || "?"})`,
-        p.draft?.year ? `Draft ${p.draft.year}` : "Draft info unavailable"
-      ]
-    }));
-  } catch (err) {
-    console.error(`Erreur récupération roster ${teamName}:`, err);
-    return [];
   }
 }
 
@@ -1132,7 +1121,7 @@ function afficherIndice() {
 function passeAuJoueurSuivant() {
   joueurIndex++;
   indiceIndex = 0;
-  essaisRestants = 4;
+  essaisRestants = 5;
   indiceDiv.textContent = "";
   if (joueurIndex >= joueurs.length) {
     finDeJeu();
@@ -1222,7 +1211,7 @@ boutonValider.addEventListener("click", () => {
 boutonRejouer.addEventListener("click", () => {
   joueurIndex = 0;
   indiceIndex = 0;
-  essaisRestants = 4;
+  essaisRestants = 5;
   score = 0;
 
   divJeu.style.display = "none";
@@ -1263,7 +1252,7 @@ btnCommencer.addEventListener("click", async () => {
 
   joueurIndex = 0;
   indiceIndex = 0;
-  essaisRestants = 4;
+  essaisRestants = 5;
   score = 0;
 
   
