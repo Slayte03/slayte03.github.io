@@ -1010,23 +1010,22 @@ const localTeams = {
   ]
 };
 
-function getFlag(country) {
-  const map = {
-    CAN: "ca",
-    USA: "us",
-    SWE: "se",
-    FIN: "fi",
-    CZE: "cz",
-    RUS: "ru",
-    SUI: "ch",
-    GER: "de",
-    FRA: "fr",
-    DEN: "dk",
-    NOR: "no"
+function getFlag(countryCode) {
+  const flags = {
+    CAN: "🇨🇦",
+    USA: "🇺🇸",
+    SWE: "🇸🇪",
+    FIN: "🇫🇮",
+    CZE: "🇨🇿",
+    RUS: "🇷🇺",
+    SUI: "🇨🇭",
+    GER: "🇩🇪",
+    FRA: "🇫🇷",
+    DEN: "🇩🇰",
+    NOR: "🇳🇴",
   };
 
-  const code = map[country] || "un";
-  return `https://flagcdn.com/24x18/${code}.png`;
+  return flags[countryCode] || "🏳️";
 }
 
 async function loadAllTeams() {
@@ -1079,7 +1078,7 @@ async function loadAllTeams() {
           `Position ${player.position ?? "?"}`,
 
           `Age ${player.age ?? "?"}`,
-          `Nationality: <img src="${getFlag(player.nationality)}">`
+          `${getFlag(player.nationality)}`
         ]
       }));
 
