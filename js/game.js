@@ -1116,6 +1116,16 @@ function getAllPlayers() {
   return all;
 }
 
+function revealPlayer(joueur) {
+  messageDiv.innerHTML = `
+    <strong>Answer:</strong> ${joueur.nom}<br>
+    #${joueur.numero ?? "?"} ${joueur.team ?? ""}<br>
+    Position: ${joueur.position ?? "?"}<br>
+    Age: ${joueur.age ?? "?"}<br>
+    Nationality: ${joueur.nationality ?? "?"}
+  `;
+}
+
 function melangerArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -1203,13 +1213,16 @@ function finDeJeu() {
 boutonSkip.addEventListener("click", () => {
   const joueur = joueurs[joueurIndex];
   if (!joueur) return;
+
+  revealPlayer(joueur);
+
   reponseInput.style.display = "none";
+
   boutonValider.textContent = "Next";
-  boutonValider.style.marginTop = "4px";
   enAttenteDeSuivant = true;
+
   boutonHint.style.display = "none";
   boutonSkip.style.display = "none";
-  messageDiv.innerHTML = `Skipped! The correct answer was <span style="color: green;">${joueur.nom}</span>.`;
 });
 
 boutonValider.addEventListener("click", () => {
@@ -1237,15 +1250,18 @@ boutonValider.addEventListener("click", () => {
   }
 
   if (reponse === bonneReponse) {
-    score++;
-    reponseInput.style.display = "none";
-    messageDiv.innerHTML = `Nice Work! It was <span style="color: green;">${joueur.nom}</span> ! 🎉`;
-    boutonValider.textContent = "Next";
-    boutonValider.style.marginTop = "4px";
-    enAttenteDeSuivant = true;
-    boutonHint.style.display = "none";
-    boutonSkip.style.display = "none";
-  } else {
+  score++;
+
+  revealPlayer(joueur); // ⭐ AJOUT ICI
+
+  reponseInput.style.display = "none";
+
+  boutonValider.textContent = "Next";
+  enAttenteDeSuivant = true;
+
+  boutonHint.style.display = "none";
+  boutonSkip.style.display = "none";
+} else {
     essaisRestants--;
     if (essaisRestants === 0) {
       reponseInput.style.display = "none";
