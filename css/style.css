@@ -65,7 +65,7 @@ button:hover {
 
 #boutonValider {
   background-color: #00779b;
-  margin-top: 5px;
+  margin-top: 15px;
 }
 
 #boutonValider:hover {
@@ -89,7 +89,7 @@ button:hover {
 }
 
 .message {
-  margin-top: 30px;
+  margin-top: 5px;
   font-weight: bold;
   color: #e2e2e2;
   font-size: 1.3em;
@@ -97,7 +97,7 @@ button:hover {
 }
 
 #progression {
-  margin-top: 30px;
+  margin-top: 5px;
   font-style: italic;
   color: #007af3;
   font-size: 1.1em;

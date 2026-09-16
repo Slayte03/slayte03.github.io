@@ -1194,19 +1194,17 @@ function initialiserJeu(nb) {
 
 function afficherIndice() {
   const joueur = joueurs[joueurIndex];
-  if (!joueur) return;
+  if (!joueur || indiceIndex === "reveal") return;
 
-  // ❌ STOP si déjà révélé
-  if (indiceIndex === "reveal") return;
+  indiceDiv.innerHTML = joueur.indices.join(" / ");
 
-  if (indiceIndex < joueur.indices.length) {
-    const indicesActuels = joueur.indices.slice(0, indiceIndex + 1).join(" / ");
-    indiceDiv.innerHTML = `Hint ${indiceIndex + 1} : ${indicesActuels}`;
-    indiceIndex++;
-  }
+  // All hints are visible, so hide the Next Hint button.
+  boutonHint.style.display = "none";
 
-  progressionDiv.textContent = `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
-  messageDiv.textContent = `Guesses Left : ${essaisRestants}`;
+  progressionDiv.textContent =
+    `Player ${joueurIndex + 1} / ${joueurs.length} — Score : ${score}`;
+
+  messageDiv.textContent = ``;
   reponseInput.value = "";
   reponseInput.focus();
 }
@@ -1260,6 +1258,7 @@ boutonSkip.addEventListener("click", () => {
 
   revealPlayer(joueur);
   indiceIndex = "reveal";
+  
 
   reponseInput.style.display = "none";
 
@@ -1276,29 +1275,47 @@ boutonValider.addEventListener("click", () => {
 
   if (enAttenteDeSuivant) {
     passeAuJoueurSuivant();
-    boutonValider.textContent = "Guess";
-    enAttenteDeSuivant = false;
     return;
   }
 
   const reponse = reponseInput.value.trim().toLowerCase();
   const bonneReponse = joueur.nom.toLowerCase();
 
+  messageDiv.style.fontStyle = "normal";
+  messageDiv.style.color = "";
+
   if (reponse === "") {
-    messageDiv.textContent = "Enter a valid name";
-    messageDiv.style.fontStyle = "Italic";
-    setTimeout(() => {
-      messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
-      messageDiv.style.fontStyle = "Normal";
-    }, 2000);
-    return;
-  }
+  messageDiv.textContent = "Enter a valid name";
+
+  setTimeout(() => {
+    if (messageDiv.textContent === "Enter a valid name") {
+      messageDiv.textContent = "";
+    }
+  }, 1500);
+
+  return;
+}
 
   if (reponse === bonneReponse) {
     score++;
+    messageDiv.textContent = "Good Answer";
+    messageDiv.style.color = "green";
 
-    revealPlayer(joueur); // ⭐ AJOUT ICI
+    revealPlayer(joueur);
+    indiceIndex = "reveal";
 
+    reponseInput.style.display = "none";
+    boutonValider.textContent = "Next";
+    enAttenteDeSuivant = true;
+
+    boutonHint.style.display = "none";
+    boutonSkip.style.display = "none";
+    } else {
+    revealPlayer(joueur);
+    indiceIndex = "reveal";
+
+    messageDiv.textContent = "Wrong Answer!";
+    messageDiv.style.color = "red";
     reponseInput.style.display = "none";
 
     boutonValider.textContent = "Next";
@@ -1306,20 +1323,6 @@ boutonValider.addEventListener("click", () => {
 
     boutonHint.style.display = "none";
     boutonSkip.style.display = "none";
-  } else {
-    essaisRestants--;
-    if (essaisRestants === 0) {
-      reponseInput.style.display = "none";
-      messageDiv.innerHTML = `Oops, The Answer Was <span style="color: green;">${joueur.nom}</span>.`;
-      boutonValider.textContent = "Next";
-      boutonValider.style.marginTop = "4px";
-      enAttenteDeSuivant = true;
-      boutonHint.style.display = "none";
-      boutonSkip.style.display = "none";
-    } else {
-      messageDiv.textContent = `Wrong Player. Guesses Left: ${essaisRestants}. New Hint.`;
-      setTimeout(afficherIndice, 2000);
-    }
   }
 });
 
@@ -1382,10 +1385,10 @@ btnCommencer.addEventListener("click", async () => {
 
   initialiserJeu(nbJoueurs);
 
-  messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
+  messageDiv.textContent = ``;
   indiceDiv.textContent = "";
   afficherIndice();
-  messageDiv.textContent = `Guesses Left: ${essaisRestants}`;
+  messageDiv.textContent = ``;
 });
 
 function clearNHLCache() {
