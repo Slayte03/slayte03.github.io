@@ -1089,8 +1089,10 @@ async function loadAllTeams() {
         numero: player.numero,
         position: player.position,
         shootsCatches: player.shootsCatches,
+        draftYear: player.draftYear,
         age: player.age,
         nationality: player.nationality,
+
 
         indices: [
           `#${player.numero ?? "?"} ${teamName}`,
@@ -1103,7 +1105,11 @@ async function loadAllTeams() {
 
           `Age ${player.age ?? "?"}`,
 
-          `Nationality ${getFlagImg(player.nationality)}`
+          `Nationality ${getFlagImg(player.nationality)}`,
+
+          player.draftYear === null
+            ? "Undrafted"
+            : `Draft ${player.draftYear ?? "?"}`
         ]
       }));
 
@@ -1149,7 +1155,13 @@ function revealPlayer(joueur) {
 
     `Age ${joueur.age ?? "?"}`,
 
-    `Nationality ${getFlagImg(joueur.nationality)}`
+    `Nationality ${getFlagImg(joueur.nationality)}`,
+
+    joueur.draftYear === null
+      ? "Undrafted"
+      : joueur.draftYear != null
+        ? `Draft ${joueur.draftYear}`
+        : joueur.indices.find(hint => /draft/i.test(hint)) ?? "Draft ?"
   ];
 
   indiceDiv.innerHTML = `
@@ -1258,7 +1270,7 @@ boutonSkip.addEventListener("click", () => {
 
   revealPlayer(joueur);
   indiceIndex = "reveal";
-  
+
 
   reponseInput.style.display = "none";
 
@@ -1285,16 +1297,16 @@ boutonValider.addEventListener("click", () => {
   messageDiv.style.color = "";
 
   if (reponse === "") {
-  messageDiv.textContent = "Enter a valid name";
+    messageDiv.textContent = "Enter a valid name";
 
-  setTimeout(() => {
-    if (messageDiv.textContent === "Enter a valid name") {
-      messageDiv.textContent = "";
-    }
-  }, 1500);
+    setTimeout(() => {
+      if (messageDiv.textContent === "Enter a valid name") {
+        messageDiv.textContent = "";
+      }
+    }, 1500);
 
-  return;
-}
+    return;
+  }
 
   if (reponse === bonneReponse) {
     score++;
@@ -1310,7 +1322,7 @@ boutonValider.addEventListener("click", () => {
 
     boutonHint.style.display = "none";
     boutonSkip.style.display = "none";
-    } else {
+  } else {
     revealPlayer(joueur);
     indiceIndex = "reveal";
 
