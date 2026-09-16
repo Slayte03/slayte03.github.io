@@ -1032,7 +1032,7 @@ function getFlagImg(country) {
 }
 
 function loadCache() {
-  const cache = localStorage.getItem("nhlCache");
+  const cache = localStorage.getItem("nhlCache-v2");
   if (cache) {
     try {
       joueursParEquipe = JSON.parse(cache);
@@ -1118,7 +1118,7 @@ async function loadAllTeams() {
       joueursParEquipe[team.name] = [];
     }
   }
-  localStorage.setItem("nhlCache", JSON.stringify(joueursParEquipe));
+  localStorage.setItem("nhlCache-v2", JSON.stringify(joueursParEquipe));
 }
 
 
@@ -1404,6 +1404,6 @@ btnCommencer.addEventListener("click", async () => {
 });
 
 function clearNHLCache() {
-  localStorage.removeItem("nhlCache");
+  localStorage.removeItem("nhlCache-v2");
 }
 
