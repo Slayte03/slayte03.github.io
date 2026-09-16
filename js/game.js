@@ -1120,9 +1120,21 @@ async function loadAllTeams() {
 // 3️⃣ Fonctions utilitaires du jeu
 // -------------------------
 function getAllPlayers() {
-  let all = [];
-  for (const e in joueursParEquipe) all = all.concat(joueursParEquipe[e]);
-  return all;
+  return Object.values(joueursParEquipe)
+    .flat()
+    .map(joueur => {
+      // Local fallback players store their number in the first hint.
+      const numero = joueur.numero ??
+        joueur.indices?.[0]?.match(/^#(\d+)(?=\s|$)/)?.[1];
+
+      return { ...joueur, numero };
+    })
+    .filter(joueur => {
+      const numero = String(joueur.numero ?? "").trim();
+
+      // Only allow jersey numbers from 1 to 99.
+      return /^\d{1,2}$/.test(numero) && Number(numero) >= 1;
+    });
 }
 
 function revealPlayer(joueur) {
